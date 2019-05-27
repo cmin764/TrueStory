@@ -119,4 +119,5 @@ GAE).
 * Source: https://github.com/savvybit/TrueStory.git
 * License: MIT
 * Authors:
-    + Cosmin Poieana <cmin764@gmail.com>
+    + Cosmin Poieana \<cmin764@gmail.com\>
+    + Irina Bejan \<irinam.bejan@gmail.com\>
