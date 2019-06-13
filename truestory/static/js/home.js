@@ -24,10 +24,11 @@ function load_articles() {
                 "left": bp[idx][0],
                 "right": bp[idx][1]
             }
-            var articles = pair_tpl.clone();
+            var articles_pair = pair_tpl.clone();
             for (var pos in update_map) {
-                var article = articles.find("div.article-" + pos);
+                var article = articles_pair.find("div.article-" + pos);
                 var data = update_map[pos];
+
                 article.find("a.article-usafe").attr("href", data["usafe"]);
                 article.find("img.card-img").attr("src", data["image"]);
                 article.find("h5.card-title").text(data["title"]);
@@ -37,10 +38,11 @@ function load_articles() {
                 article.find("p.article-summary").text(summary);
                 article.find("span.article-source").text(data["source_name"]);
                 article.find("small.article-published").text(data["published"]);
+                article.find("span.article-authors").text(data["authors"]);
                 article.find("cite").text(data["link"]);
             }
 
-            article_list.append(articles);
+            article_list.append(articles_pair);
         }
 
         // Set the next cursor for future retrieval.

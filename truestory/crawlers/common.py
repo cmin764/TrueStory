@@ -6,10 +6,13 @@ import urllib.parse as urlparse
 from bs4 import BeautifulSoup
 
 
-def strip_article_link(link):
+def strip_article_link(link, site=None):
     """Returns an article link without the query."""
     parsed = urlparse.urlsplit(link)
-    parts = [parsed.scheme, parsed.netloc, parsed.path, None, None]
+    netloc = parsed.netloc
+    if site and site not in link:
+        netloc = site
+    parts = [parsed.scheme, netloc, parsed.path, None, None]
     return urlparse.urlunsplit(parts)
 
 

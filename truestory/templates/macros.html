@@ -22,7 +22,7 @@
             <small class="text-muted ml-2 article-published">{{ article.published|format_date(time=True) }}</small>
 
             <span class="blockquote-footer float-right">
-              {{ article.authors|join(', ') }} on
+              <span class="article-authors">{{ article.authors|join_authors }}</span> on
               <cite title="Source website" class="text-dark">{{ article.link|website }}</cite>
             </span>
           </p>

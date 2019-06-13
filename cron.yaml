@@ -5,4 +5,4 @@ cron:
 
 - description: "clean outdated articles"
   url: /cron/clean
-  schedule: every 24 hours
+  schedule: every 3 hours

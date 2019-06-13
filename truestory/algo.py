@@ -3,6 +3,8 @@ the articles.
 """
 
 
+import logging
+
 from truestory.models import PreferencesModel
 
 
@@ -42,10 +44,18 @@ def get_bias_score(main, candidate):
     prefs = _get_preferences()
 
     contradiction_score = _get_contradiction_score(main, candidate)
+    logging.debug(
+        "%r vs. %r -> contradiction score: %f",
+        main.link, candidate.link, contradiction_score
+    )
     if contradiction_score < prefs.contradiction_threshold:
         return False, 0
 
     similarity_score = _get_similarity_score(main, candidate)
+    logging.debug(
+        "%r vs. %r -> similarity score: %f",
+        main.link, candidate.link, similarity_score
+    )
     if similarity_score < prefs.similarity_threshold:
         return False, 0
 

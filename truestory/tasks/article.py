@@ -95,7 +95,7 @@ def pair_article(article_usafe):
     for link, article in list(related_articles.items()):
         if article.side is None:
             logging.warning(
-                "Skipping related article %r because it's side is missing.", link
+                "Skipping related article %r because its side is missing.", link
             )
             del related_articles[link]
 
@@ -103,6 +103,10 @@ def pair_article(article_usafe):
     for article in related_articles.values():
         must_save, score = algo.get_bias_score(main_article, article)
         if not must_save:
+            logging.debug(
+                "Skipping potential pair article %r because score is too low.",
+                article.link
+            )
             continue
 
         qfilters_list = [
@@ -120,7 +124,10 @@ def pair_article(article_usafe):
             logging.info("Removing %d duplicate bias pairs first.", len(bias_pair_keys))
             BiasPairModel.remove_multi(bias_pair_keys)
 
-        logging.info("Adding new bias pair with score %f.", score)
+        logging.info(
+            "Adding new bias pair with score %f between %r and %r.",
+            score, main_article.link, article.link
+        )
         BiasPairModel(left=main_article.key, right=article.key, score=score).put()
         added_pairs += 1
 

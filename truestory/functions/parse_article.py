@@ -40,10 +40,11 @@ def parse_article(request):
     internal_country = request.headers.get("X-Appengine-Country") == "ZZ"
     if not any([gae_ip, internal_country]):
         abort(403)
+
     data = request.get_json() or request.args
     link = data.get("link")
     if not link:
-        abort(400)
+        abort(400, "Link not supplied.")
 
     try:
         article = get_article(link)
@@ -51,13 +52,17 @@ def parse_article(request):
         logging.exception(exc)
         abort(404)
 
+    news_article = {
+        "url": article.url,
+        "title": article.title,
+        "text": article.text,
+        "summary": article.summary,
+        "authors": article.authors,
+        "publish_date": article.publish_date,
+        "top_image": article.top_image,
+        "keywords": article.keywords,
+    }
     response = {
-        "news_article": {
-            "text": article.text,
-            "authors": article.authors,
-            "publish_date": article.publish_date,
-            "top_image": article.top_image,
-            "keywords": article.keywords,
-        }
+        "news_article": news_article
     }
     return response

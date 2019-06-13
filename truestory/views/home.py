@@ -10,12 +10,18 @@ from truestory.views import base as views_base
 
 def _get_serializable_article(key):
     """JSON serializable article format used by the front-end ajax calls."""
+    paragraph_split = lambda text: (
+        "\n".join(views_base.paragraph_split_filter(text)) if text else ""
+    )
+
     article = key.get()
     details = article.to_dict()
     details.update({
         "usafe": url_for("article_view", article_usafe=article.urlsafe),
         "link": views_base.website_filter(details["link"]),
-        "content": "\n".join(views_base.paragraph_split_filter(details["content"])),
+        "content": paragraph_split(details["content"]),
+        "summary": paragraph_split(details["summary"]),
+        "authors": views_base.join_authors_filter(details["authors"]),
         "published": views_base.format_date_filter(details["published"], time=True),
     })
     return details

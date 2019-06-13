@@ -10,6 +10,7 @@ class RssTargetModel(SideMixin, BaseModel):
 
     source_name = ndb.StringProperty(required=True)
     link = ndb.StringProperty(required=True)
+    site = ndb.StringProperty(required=True)
 
     last_modified = ndb.DateTimeProperty()
     etag = ndb.StringProperty()

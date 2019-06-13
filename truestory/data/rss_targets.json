@@ -1,7 +1,7 @@
 [
   {
     "source_name": "Al Jazeera",
-    "link": "http://america.aljazeera.com/content/ajam/articles.rss",
+    "link": "https://www.aljazeera.com/xml/rss/all.xml",
     "side": "Center"
   },
   {
@@ -24,7 +24,8 @@
   },
   {
     "source_name": "CNN",
-    "link": "http://rss.cnn.com/rss/edition.rss"
+    "link": "http://rss.cnn.com/rss/edition.rss",
+    "side": "Lean Left"
   },
   {
     "source_name": "Daily Mail",

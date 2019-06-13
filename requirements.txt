@@ -3,6 +3,7 @@ Flask-Cors>=3.0.7
 Flask-JSON>=0.3.3
 Flask-RESTful>=0.3.7
 PyYAML>=5.1
+addict>=2.2.1
 attrs>=19.1.0
 beautifulsoup4>=4.7.1
 cattrs>=0.9.0

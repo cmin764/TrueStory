@@ -281,7 +281,7 @@ class SideMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.side is None:
-            self.side = self.get_side(self.link)
+            self.side = self._get_side(self.link, site=getattr(self, "site", None))
 
     @classmethod
     def normalize_site(cls, site):
@@ -299,14 +299,18 @@ class SideMixin:
         return cls._prefs
 
     @classmethod
-    def get_side(cls, link):
-        if not link:
-            return None
-
-        prefs = cls._get_prefs()
-        site = cls.normalize_site(urlparse.urlsplit(link).netloc)
-        site_info = prefs.sites.get(site)
+    def get_site_info(cls, link, site=None):
+        site = site or cls.normalize_site(urlparse.urlsplit(link).netloc)
+        site_info = cls._get_prefs().sites.get(site)
         if not site_info:
             raise Exception(f"item coming from unrecognized source {site!r}")
 
+        return site, site_info
+
+    @classmethod
+    def _get_side(cls, link, site):
+        if not link:
+            return None
+
+        _, site_info = cls.get_site_info(link, site=site)
         return cls.SIDE_MAPPING[site_info["side"]]
