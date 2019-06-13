@@ -56,7 +56,10 @@ class NewsArticleAttr(BaseAttr):
         "https://europe-west1-truestory.cloudfunctions.net/parse_article"
     )
 
+    url: str = attr.ib()
+    title: str = attr.ib()
     text: str = attr.ib()
+    summary: str = attr.ib()
     authors: Sequence[str] = attr.ib()
     publish_date: datetime.datetime = attr.ib()
     top_image: str = attr.ib()

@@ -2,6 +2,7 @@
 
 
 from .article import ArticleModel, BiasPairModel
-from .base import BaseModel, DuplicateMixin, NAMESPACE, ndb
+from .base import NAMESPACE
 from .mail import SubscriberModel
+from .preferences import PreferencesModel
 from .rss import RssTargetModel

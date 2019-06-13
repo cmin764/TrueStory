@@ -1,0 +1,99 @@
+[
+  {
+    "source_name": "Al Jazeera",
+    "link": "https://www.aljazeera.com/xml/rss/all.xml",
+    "side": "Center"
+  },
+  {
+    "source_name": "CNBC - Politics",
+    "link": "https://www.cnbc.com/id/10000113/device/rss/rss.html"
+  },
+  {
+    "source_name": "CNBC - Top News",
+    "link": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+    "enabled": false
+  },
+  {
+    "source_name": "CNBC - U.S. News",
+    "link": "https://www.cnbc.com/id/15837362/device/rss/rss.html"
+  },
+  {
+    "source_name": "CNBC - World News",
+    "link": "https://www.cnbc.com/id/100727362/device/rss/rss.html",
+    "enabled": false
+  },
+  {
+    "source_name": "CNN",
+    "link": "http://rss.cnn.com/rss/edition.rss",
+    "side": "Lean Left"
+  },
+  {
+    "source_name": "Daily Mail",
+    "link": "https://www.dailymail.co.uk/articles.rss"
+  },
+  {
+    "source_name": "Fox News - Most Popular",
+    "link": "http://feeds.foxnews.com/foxnews/most-popular",
+    "enabled": false
+  },
+  {
+    "source_name": "Fox News - National",
+    "link": "http://feeds.foxnews.com/foxnews/national"
+  },
+  {
+    "source_name": "Fox News - Politics",
+    "link": "http://feeds.foxnews.com/foxnews/politics"
+  },
+  {
+    "source_name": "Fox News - World",
+    "link": "http://feeds.foxnews.com/foxnews/world",
+    "enabled": false
+  },
+  {
+    "source_name": "Media Matters",
+    "link": "https://www.mediamatters.org/rss/blog.rss"
+  },
+  {
+    "source_name": "Reuters - Politics",
+    "link": "http://feeds.reuters.com/Reuters/PoliticsNews"
+  },
+  {
+    "source_name": "Reuters - Top News",
+    "link": "http://feeds.reuters.com/reuters/topNews",
+    "enabled": false
+  },
+  {
+    "source_name": "Reuters - U.S. News",
+    "link": "http://feeds.reuters.com/Reuters/domesticNews"
+  },
+  {
+    "source_name": "Reuters - World News",
+    "link": "http://feeds.reuters.com/Reuters/worldNews",
+    "enabled": false
+  },
+  {
+    "source_name": "Sky News - Politics",
+    "link": "http://feeds.skynews.com/feeds/rss/politics.xml",
+    "side": "Center"
+  },
+  {
+    "source_name": "Sky News - U.S.",
+    "link": "http://feeds.skynews.com/feeds/rss/us.xml",
+    "side": "Center"
+  },
+  {
+    "source_name": "Sky News - World",
+    "link": "http://feeds.skynews.com/feeds/rss/world.xml",
+    "side": "Center",
+    "enabled": false
+  },
+  {
+    "source_name": "Vox - Politics",
+    "link": "https://www.vox.com/rss/politics/index.xml"
+  },
+  {
+    "source_name": "Vox - World",
+    "link": "https://www.vox.com/rss/world/index.xml",
+    "enabled": false
+  }
+]

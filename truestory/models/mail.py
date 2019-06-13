@@ -22,6 +22,14 @@ class SubscriberModel(BaseModel):
     hashsum = ndb.StringProperty(required=True)
     subscribed = ndb.BooleanProperty(default=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.hashsum is None:
+            date = datetime.datetime.utcnow()
+            string = f"{self.mail}_{date.isoformat()}"
+            self.hashsum = hashlib.md5(string.encode(settings.ENCODING)).hexdigest()
+
     def send_greetings(self, site):
         """Sends greetings e-mail to our new subscriber."""
         party_url = f"/static/img/party.png"
@@ -39,10 +47,3 @@ class SubscriberModel(BaseModel):
             self.mail, "Subscribed to TrueStory",
             text_content=text_content, html_content=html_content
         )
-
-    def put(self):
-        if not self.exists:
-            date = datetime.datetime.utcnow()
-            string = f"{self.mail}_{date.isoformat()}"
-            self.hashsum = hashlib.md5(string.encode(settings.ENCODING)).hexdigest()
-        return super().put()

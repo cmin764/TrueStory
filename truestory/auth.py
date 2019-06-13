@@ -2,23 +2,20 @@
 
 
 import hmac
-import pkg_resources
 import re
 
 import requests
 from flask import request
 
-from truestory import app, settings
+from truestory import app, datautil, settings
 
 
 CAPTCHA_URL = "https://www.google.com/recaptcha/api/siteverify"
-
 RE_HOST = re.compile(r"localhost|truestory", re.IGNORECASE)
 
 
 def get_secret(name):
-    content = pkg_resources.resource_string("truestory", f"secrets/{name}")
-    return content.decode(settings.ENCODING).strip()
+    return datautil.get_string(f"secrets/{name}")
 
 
 def compute_token(mail):

@@ -5,6 +5,7 @@ import datetime
 import functools
 import logging
 import os
+import urllib.parse as urlparse
 from collections import OrderedDict
 
 import ndb_orm as ndb
@@ -18,7 +19,6 @@ from truestory import app, settings
 PROJECT = settings.PROJECT_ID
 NAMESPACE = app.config["DATASTORE_NAMESPACE"]
 NDB_KWARGS = {"project": PROJECT, "namespace": NAMESPACE}
-
 # Number of entities to be put/removed at once.
 MAX_BATCH_SIZE = 500
 
@@ -26,6 +26,8 @@ MAX_BATCH_SIZE = 500
 # is used only, so we don't have any issues with the Datastore agnostic tests or
 # debugging, because creating a client will require valid credentials.
 client = None
+# Lazily loaded due to circular import (under SideMixin).
+PreferencesModel = None
 
 
 def key_to_urlsafe(key):
@@ -125,6 +127,7 @@ class BaseModel(ndb.Model):
         Args:
             query: Optionally you can supply a custom `query`.
             keys_only (bool): Keep the Key properties only if this is True.
+            order (bool): Implicit by the time it was created in descending order.
         Returns:
             list: Fetched items.
         """
@@ -252,3 +255,62 @@ class DuplicateMixin:
                 unique_entities[primary_value] = entity.update(duplicates)
 
         return super().put_multi(unique_entities.values())
+
+
+class SideMixin:
+
+    """Adds side info to a model."""
+
+    LEFT = -2
+    LEAN_LEFT = -1
+    CENTER = 0
+    LEAN_RIGHT = 1
+    RIGHT = 2
+    SIDE_MAPPING = {
+        "Left": LEFT,
+        "Lean Left": LEAN_LEFT,
+        "Center": CENTER,
+        "Lean Right": LEAN_RIGHT,
+        "Right": RIGHT
+    }
+    SITE_REPLACE = ["www.", "rss.", "feeds."]
+    _prefs = None
+
+    side = ndb.IntegerProperty(required=True, choices=list(SIDE_MAPPING.values()))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.side is None:
+            self.side = self._get_side(self.link, site=getattr(self, "site", None))
+
+    @classmethod
+    def normalize_site(cls, site):
+        for repl in cls.SITE_REPLACE:
+            site = site.replace(repl, "", 1)
+        return site
+
+    @classmethod
+    def _get_prefs(cls):
+        if not cls._prefs:
+            global PreferencesModel
+            if not PreferencesModel:
+                from truestory.models.preferences import PreferencesModel
+            cls._prefs = PreferencesModel.instance()
+        return cls._prefs
+
+    @classmethod
+    def get_site_info(cls, link, site=None):
+        site = site or cls.normalize_site(urlparse.urlsplit(link).netloc)
+        site_info = cls._get_prefs().sites.get(site)
+        if not site_info:
+            raise Exception(f"item coming from unrecognized source {site!r}")
+
+        return site, site_info
+
+    @classmethod
+    def _get_side(cls, link, site):
+        if not link:
+            return None
+
+        _, site_info = cls.get_site_info(link, site=site)
+        return cls.SIDE_MAPPING[site_info["side"]]

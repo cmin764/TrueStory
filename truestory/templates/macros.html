@@ -11,7 +11,7 @@
           <div class="col-8">
             <div class="card-body">
               <h5 class="card-title font-article-title">{{ article.title }}</h5>
-              <p class="card-text article-summary">{{ article.summary or article.content|paragraph_split|join('\n') }}</p>
+              <p class="card-text article-summary">{{ (article.summary or article.content)|paragraph_split|join('\n') }}</p>
             </div>
           </div>
         </div>
@@ -22,7 +22,7 @@
             <small class="text-muted ml-2 article-published">{{ article.published|format_date(time=True) }}</small>
 
             <span class="blockquote-footer float-right">
-              {{ article.authors|join(', ') }} on
+              <span class="article-authors">{{ article.authors|join_authors }}</span> on
               <cite title="Source website" class="text-dark">{{ article.link|website }}</cite>
             </span>
           </p>

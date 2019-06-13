@@ -1,29 +1,27 @@
 """RSS feed crawler capable of extracting and parsing found articles."""
 
 
+import calendar
 import collections
 import logging
-import requests
-import time
+import urllib.request as urlopen
 from datetime import datetime, timezone
 from http import HTTPStatus
 
 import feedparser
-from bs4 import BeautifulSoup
 
 from truestory import functions
+from truestory.crawlers.common import strip_article_link, strip_html
 from truestory.models.article import ArticleModel
 
 
-def _strip_html(html):
-    if not html:
-        return html
-
-    soup = BeautifulSoup(html, "html5lib")
-    return soup.text.strip()
-
-
 class RssCrawler:
+
+    """Crawler for any type of RSS feed targets."""
+
+    ALLOWED_EXCEPTIONS = (
+        feedparser.CharacterEncodingOverride,
+    )
 
     def __init__(self, rss_targets, limit=None):
         """Instantiates with a RSS target list to crawl.
@@ -36,6 +34,13 @@ class RssCrawler:
         self._limit = limit
 
     @staticmethod
+    def _time_to_date(parsed_time):
+        """Converts `parsed_time` to a datetime object."""
+        if not parsed_time:
+            return parsed_time
+        return datetime.fromtimestamp(calendar.timegm(parsed_time), tz=timezone.utc)
+
+    @staticmethod
     def _normalize_date(date):
         """Corrects dates potentially from the future."""
         if not date:
@@ -46,36 +51,46 @@ class RssCrawler:
         return min(date, datetime.utcnow())
 
     @classmethod
-    def _extract_article(cls, feed_entry, source_name):
+    def extract_article(cls, feed_entry, target):
         """Extracts all the information needed from a `feed_entry` and returns it as
         an `ArticleModel` object.
         """
-        # Link and title are mandatory fields in a RSS. If missing, we cannot
-        # parse the article.
+        # Link is a mandatory field in the RSS. If missing, we cannot parse the
+        # article.
         link = feed_entry.get("link")
-        title = feed_entry.get("title")
-        if not all([link, title]):
-            raise KeyError("link or title missing from the feed article")
+        if not link:
+            raise KeyError("link missing from the feed article")
 
-        # The 'description' value seems to be an alternative tag for summary.
-        summary = feed_entry.get("summary") or feed_entry.get("description")
         news_article = functions.get_article(link)
+        link = urlopen.urlopen(news_article.url).url
+        title = feed_entry.get("title") or news_article.title
+        # The 'description' value seems to be an alternative tag for summary.
+        summary = (
+            feed_entry.get("summary") or
+            feed_entry.get("description") or
+            news_article.summary
+        )
+        publish_date = (
+            cls._time_to_date(feed_entry.get("published_parsed")) or
+            news_article.publish_date
+        )
         to_lower = lambda strings: list(
             filter(None, [string.lower().strip() for string in strings])
         )
 
         article_ent = ArticleModel(
-            source_name=source_name,
+            source_name=target.source_name,
             # NOTE(cmiN): Use the final URL (after redirects), because based on this
             # we uniquely identify articles (primary key is `link`).
-            link=requests.get(link).url,
+            link=strip_article_link(link, site=target.site),
             title=title,
             content=news_article.text,
-            summary=_strip_html(summary),
+            summary=strip_html(summary),
             authors=news_article.authors,
-            published=cls._normalize_date(news_article.publish_date),
+            published=cls._normalize_date(publish_date),
             image=news_article.top_image,
             keywords=to_lower(news_article.keywords or []),
+            side=target.side,
         )
         return article_ent
 
@@ -112,13 +127,6 @@ class RssCrawler:
             target.moved_to(response.href)
 
         return True
-
-    @staticmethod
-    def _time_to_date(parsed_time):
-        """Converts `parsed_time` to a datetime object."""
-        if not parsed_time:
-            return parsed_time
-        return datetime.fromtimestamp(time.mktime(parsed_time), tz=timezone.utc)
 
     @classmethod
     def _entries_after_date(cls, entries, date):
@@ -176,7 +184,9 @@ class RssCrawler:
 
         # Bozo is a tag which tells that the RSS hasn't been parsed correctly.
         if feed_response.bozo:
-            raise Exception(feed_response.bozo)
+            exc = feed_response.bozo_exception
+            if not isinstance(exc, self.ALLOWED_EXCEPTIONS):
+                raise feed_response.bozo_exception
 
         articles = []
         count = 0
@@ -189,15 +199,13 @@ class RssCrawler:
                     )
                     break
                 try:
-                    article = self._extract_article(feed_entry, target.source_name)
+                    article = self.extract_article(feed_entry, target)
                 except Exception as exc:
                     # NOTE(cmiN): On Stackdriver Error Reporting we don't want to catch
                     # (with `logging.exception`) "Not Found" errors, because they are
                     # pretty frequent and usual, therefore ignore-able.
                     log_function = (
-                        logging.error if hasattr(exc, "response") and
-                                         exc.response.status_code == 404 else
-                        logging.exception
+                        logging.error if "404" in str(exc) else logging.exception
                     )
                     log_function("Got %s while parsing %r.", exc, feed_entry.id)
                 else:

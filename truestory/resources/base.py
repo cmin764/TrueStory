@@ -31,15 +31,6 @@ class BaseResource(Resource):
     URL_PREFIX = ENDPOINT = ""
     method_decorators = [_authenticate]
 
-    @staticmethod
-    def _get_schemas():
-        raise NotImplementedError("required schemas not provided")
-
-    @classmethod
-    def _make_response(cls, which, obj, **kwargs):
-        schema = cls._get_schemas()[which]
-        return schema.jsonify(obj, _name=which, **kwargs)
-
     @classmethod
     def get_route(cls):
         """Returns the string route for the current resource."""
@@ -49,3 +40,17 @@ class BaseResource(Resource):
     def get_endpoint(cls):
         """Returns the endpoint name for the current resource."""
         return f"{cls.URL_PREFIX}_{cls.ENDPOINT}".strip("/")
+
+
+class DatastoreMixin:
+
+    """Mixin handling database serialization of entities."""
+
+    @staticmethod
+    def _get_schemas():
+        raise NotImplementedError("required schemas not provided")
+
+    @classmethod
+    def _make_response(cls, which, obj, **kwargs):
+        schema = cls._get_schemas()[which]
+        return schema.jsonify(obj, _name=which, **kwargs)

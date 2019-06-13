@@ -1,7 +1,7 @@
 """All resources exposed by the TrueStory web API."""
 
 
-from . import article
+from . import article, info
 from .. import api
 
 
@@ -15,6 +15,7 @@ ERRORS = {
 resources = [
     article.CounterArticleResource,
     article.DataArticleResource,
+    info.SitesInfoResource,
 ]
 for resource in resources:
     api.add_resource(

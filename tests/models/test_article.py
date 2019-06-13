@@ -1,10 +1,12 @@
 """Tests articles and bias pairs."""
 
 
+import pytest
 from truestory.models import ArticleModel, BiasPairModel
+from truestory.models.base import ndb
 from truestory.tasks.article import clean_articles, pair_article
 
-from .conftest import skip_no_datastore, wait_exists
+from .conftest import skip_no_datastore, wait_state
 
 
 pytestmark = skip_no_datastore
@@ -42,7 +44,7 @@ def test_cleanup(bias_pair_ents):
 
 def test_duplicate(left_article_ent, right_article_ent):
     left_article_ent.put()
-    wait_exists(left_article_ent)
+    wait_state(left_article_ent)
 
     right_article_ent.link = left_article_ent.link
     right_article_ent.put()
@@ -54,7 +56,7 @@ def test_duplicate(left_article_ent, right_article_ent):
 
 def test_duplicate_multi(left_article_ent, right_article_ent):
     left_article_ent.put()
-    wait_exists(left_article_ent)
+    wait_state(left_article_ent)
 
     right_article_ent.link = left_article_ent.link
     ArticleModel.put_multi([left_article_ent, right_article_ent])
@@ -66,14 +68,14 @@ def test_duplicate_multi(left_article_ent, right_article_ent):
 
 def test_pair_article(left_article_ent, right_article_ent):
     left_article_ent.put()
-    wait_exists(left_article_ent)
+    wait_state(left_article_ent)
 
     assert len(ArticleModel.get_related_articles(left_article_ent.key)) == 0, (
         "dirty datastore (with bias pairs)"
     )
 
     right_article_ent.put()
-    wait_exists(right_article_ent)
+    wait_state(right_article_ent)
     # NOTE(cmiN): A previous pair is created automatically when the second article is
     # put. Still, the following line solves duplicates by itself.
     pair_article(left_article_ent.urlsafe)
@@ -85,3 +87,15 @@ def test_pair_article(left_article_ent, right_article_ent):
     assert list(related_articles)[0]["article"].key == right_article_ent.key, (
         "wrong bias pair created"
     )
+
+
+def test_article_side(bias_pair_ents):
+    wait_state(bias_pair_ents)
+    assert bias_pair_ents[0].side == -2
+    assert bias_pair_ents[1].side == 2
+
+
+def test_article_missing_side(left_article_ent):
+    left_article_ent.side = None
+    with pytest.raises(ndb.datastore_errors.BadValueError):
+        left_article_ent.put()

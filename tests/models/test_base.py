@@ -1,7 +1,7 @@
 """Tests base utilities used in Datastore interactions."""
 
 
-from .conftest import TrueStoryModel, skip_no_datastore, wait_exists
+from .conftest import SideStoryModel, TrueStoryModel, skip_no_datastore, wait_state
 
 
 pytestmark = skip_no_datastore
@@ -43,7 +43,7 @@ def test_model_query(truestory_ent):
     total = nr * (nr + 1) // 2
     truestory_ent.list_prop = list(range(nr + 1))
     truestory_ent.put()
-    wait_exists(truestory_ent)
+    wait_state(truestory_ent)
 
     # Checking each of them for the edge case when the DB is dirty (parallel tests).
     entities = TrueStoryModel.all()
@@ -58,3 +58,13 @@ def test_model_query(truestory_ent):
 def test_model_key(truestory_ent):
     truestory_ent.put()
     assert truestory_ent.myself.myself
+
+
+def test_side_story():
+    sidestory_ent = SideStoryModel()
+    sidestory_ent.put()
+    assert sidestory_ent.side == SideStoryModel.CENTER
+
+    custom_sidestory_ent = SideStoryModel(side=SideStoryModel.RIGHT)
+    custom_sidestory_ent.put()
+    assert custom_sidestory_ent.side == SideStoryModel.RIGHT
